@@ -39,17 +39,24 @@ class IdPlus extends Plugins
 					$idreflink='';
 					$orcidlink='';
 	                //$result = $db->getrow(lq("SELECT * FROM #_TP_identifiants WHERE id ='". $idperson. "'"));
-				$result = $db->getrow(lq("select distinct(idref) from #_TP_relations join #_TP_entities_auteurs using(idrelation) where id2='".$idperson."' and nature='G' and idref is not null"));
+				$result = $db->getrow(lq("select distinct(idref) from #_TP_relations join #_TP_entities_auteurs using(idrelation) where id2='".$idperson."' and nature='G' and (idref is not null and idref !='')"));
 					//$result= $db->getrow(lq("SELECT idref FROM entities_auteurs,relations WHERE id2='".$idperson."' and nature='G' and degree=1 and relations.idrelation=entities_auteurs.idrelation"));
-					file_put_contents("/var/www/prairial/octest",print_r($result,true)." ".$idperson,FILE_APPEND);
-
+//					file_put_contents("/var/www/prairial/octest",print_r($result,true)." ".$idperson,FILE_APPEND);
+$enregistrer=1;
 					if ($result === false) {
 						trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
 					}
                     $idref = isset($result['idref']) ? $result['idref'] : '';  
+						file_put_contents('/var/www/prairial/octest','RESULT'. count($result));
+					if ($idref) {
+				        $result = $db->getrow(lq("select idrelation from entities_auteurs join relations using(idrelation) where id2='".$idperson."' and nature='G' and (idref is null or idref='')"));
+						//file_put_contents('/var/www/prairial/octest','RESULT '.$result['idperson']);
+                        $enregistrer = count($result);
+					}
 					$numFound_idref=0;
 					/*
 					if (!$idref) {
+					    $enregistrer=1;
 						//libxml_use_internal_errors(true);
 					    $xml = simplexml_load_file("https://www.idref.fr/Sru/Solr?q=persname_t:(".urlencode($nom." AND ".$prenom).")&fl=ppn_z");
 						/*
@@ -131,9 +138,13 @@ class IdPlus extends Plugins
                 }
 			}
 			
-			$authform.= '</table><input type="hidden" name="iddocument" value="'.$iddocument.'"/>
-			<input type="submit" value="Enregistrer" />
-			</form></div>';  
+			$authform.= '</table>';
+			if ($enregistrer) {
+			    $authform.= '<input type="hidden" name="iddocument" value="'.$iddocument.'"/>
+			                 <input type="submit" value="Enregistrer" />';
+		    }
+
+			$authform .= '</form></div>';  
 			View::$page = preg_replace('/(<\/div>\s*<\/div>\s*<\/body>)/s',$authform.'$1',View::$page);
 		}
 	}
