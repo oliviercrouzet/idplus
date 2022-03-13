@@ -171,8 +171,7 @@ $enregistrer=1;
 			    $id = $idperson[$i];
 				$ref = $idref[$i];
                 //$q .= " VALUES('".$idperson[$i]. "', '". $nom[$i]. "', '". $prenom[$i]. "', '". $idref[$i]. "', concat(articles,'". $iddocument. "'))";
-		        $q = "update entities_auteurs,relations set idref='$ref' where id2='$id' and nature='G' and degree=1 and id1 = '$iddocument'";
-				$q .= " and relations.idrelation=entities_auteurs.idrelation";
+		        $q = "update entities_auteurs join relations using(idrelation) set idref='$ref' where id2='$id' and nature='G' and id1 = '$iddocument'";
                 $result = $db->execute(lq($q));
 				if ($result === false) {
 					trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
