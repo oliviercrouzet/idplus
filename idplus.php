@@ -171,7 +171,11 @@ $enregistrer=1;
 			    $id = $idperson[$i];
 				$ref = $idref[$i];
                 //$q .= " VALUES('".$idperson[$i]. "', '". $nom[$i]. "', '". $prenom[$i]. "', '". $idref[$i]. "', concat(articles,'". $iddocument. "'))";
+				// update document courant
 		        $q = "update entities_auteurs join relations using(idrelation) set idref='$ref' where id2='$id' and nature='G' and id1 = '$iddocument'";
+				// update tous les documents du même auteur non renseignés
+		        $q = "update entities_auteurs join relations using(idrelation) set idref='$ref' where id2='$id' and nature='G'";
+				$q .= " and (idref is null or idref='')";
                 $result = $db->execute(lq($q));
 				if ($result === false) {
 					trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
