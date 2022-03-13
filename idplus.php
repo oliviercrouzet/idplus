@@ -14,12 +14,16 @@ class IdPlus extends Plugins
         if ($context['view']['tpl'] == 'edit_entities_edition' && isset($context['persons']) && $context['lodeluser']['adminlodel'] == '1') {
 			$persons = $context['persons'];
 			$site = $context['site'];
+
+            global $db;
+			/*
 			$sitefile = '../../.././share/plugins/custom/idplus/data/'.$site.'.json';
 			if (! file_exists($sitefile)) { 
 				touch($sitefile);
 			}
 		    $json_data = file_get_contents($sitefile);
 		    $refs =  json_decode($json_data, true);
+			*/
             $authform='<div class="advancedFunc">
 			           <h4>Identifiants auteurs</h4>
 			           <table class="translations" style="width:90%" cellspacing="0" cellpadding="5" border="0">
@@ -34,12 +38,17 @@ class IdPlus extends Plugins
 					$orcid = '';
 					$idreflink='';
 					$orcidlink='';
-                    if (isset($refs[$idperson])) { 
-                        $idref = $refs[$idperson]['idref'] ?: '';  
-                        $orcid =  $refs[$idperson]['orcid'] ?: '';  
+	                //$result = $db->getrow(lq("SELECT * FROM #_TP_identifiants WHERE id ='". $idperson. "'"));
+				$result = $db->getrow(lq("select distinct(idref) from #_TP_relations join #_TP_entities_auteurs using(idrelation) where id2='".$idperson."' and nature='G' and idref is not null"));
+					//$result= $db->getrow(lq("SELECT idref FROM entities_auteurs,relations WHERE id2='".$idperson."' and nature='G' and degree=1 and relations.idrelation=entities_auteurs.idrelation"));
+					file_put_contents("/var/www/prairial/octest",print_r($result,true)." ".$idperson,FILE_APPEND);
+
+					if ($result === false) {
+						trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
 					}
+                    $idref = isset($result['idref']) ? $result['idref'] : '';  
 					$numFound_idref=0;
-					$numFound_orcid=0;
+					/*
 					if (!$idref) {
 						//libxml_use_internal_errors(true);
 					    $xml = simplexml_load_file("https://www.idref.fr/Sru/Solr?q=persname_t:(".urlencode($nom." AND ".$prenom).")&fl=ppn_z");
@@ -54,6 +63,7 @@ class IdPlus extends Plugins
 							}
 						}
 						*/
+						/*
 					    $numFound_idref = (int) $xml->result['numFound'];
 					    if ($numFound_idref > 0) {
 						    $matches = [];
@@ -71,6 +81,8 @@ class IdPlus extends Plugins
 							    
 						}
 				    }
+					*/
+					/*
 					if (!$orcid) {
 					    $xml = simplexml_load_file('https://pub.orcid.org/v2.1/search?q=family-name:'.urlencode($nom).'+AND+given-names:'.urlencode($prenom));
                         $found = $xml->xpath('//search:search')[0]; 
@@ -91,7 +103,7 @@ class IdPlus extends Plugins
 							}
 						}
 					}
-
+*/
 					$authform.= '<tr><td colspan="2" style="font-size:1.1em;color:#8a8a8a"><strong>'.$prenom.' '.$nom.'</strong>
 							<input type="hidden" name="idperson[]" value="'.$idperson.'" />
 							<input type="hidden" name="prenom[]" value="'.$prenom.'" />
@@ -107,6 +119,7 @@ class IdPlus extends Plugins
 					}
 					$authform.='</label><input style="max-width:70%;" type="text" name="idref[]" value="'.$idref.'"/><br />';
 
+					/*
 					$authform.= '<label style="display:inline-block;width:30%;">';
 					if ($numFound_orcid) { 
 					    $authform.= '<a style="color:#ff5b04"'.$orcidlink.'>ORCID('.($numFound_orcid < 6 ? $numFound_orcid : '5+').')</a>';
@@ -114,6 +127,7 @@ class IdPlus extends Plugins
 					    $authform.='ORCID';
 					}
 					$authform.= '</label><input style="max-width: 70%;margin-top:5px" name="orcid[]" value="'.$orcid.'" /></td></tr>';
+					*/
                 }
 			}
 			
@@ -131,14 +145,28 @@ class IdPlus extends Plugins
 		$prenom = $_POST['prenom'];
 		$nom = $_POST['nom'];
 		$idref = $_POST['idref'];
-		$orcid = $_POST['orcid'];
+		//$orcid = $_POST['orcid'];
 		$iddocument = $_POST['iddocument'];
 		$site = $context['site'];
+        global $db;
+        //$q = "INSERT INTO #_TP_identifiants (id, nom, prenom, idref, articles)";
+		/*
 		$sitefile = '../../.././share/plugins/custom/idplus/data/'.$site.'.json';
 		if (file_exists($sitefile)) { 
 			$json_data = file_get_contents($sitefile);
 			$refs =  json_decode($json_data, true);
+	*/	
 			for ($i = 0; $i < count($idperson); $i++) {
+			    $id = $idperson[$i];
+				$ref = $idref[$i];
+                //$q .= " VALUES('".$idperson[$i]. "', '". $nom[$i]. "', '". $prenom[$i]. "', '". $idref[$i]. "', concat(articles,'". $iddocument. "'))";
+		        $q = "update entities_auteurs,relations set idref='$ref' where id2='$id' and nature='G' and degree=1 and id1 = '$iddocument'";
+				$q .= " and relations.idrelation=entities_auteurs.idrelation";
+                $result = $db->execute(lq($q));
+				if ($result === false) {
+					trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
+				}
+/*
 				$refs[$idperson[$i]] = array (
 								  'nom' => $nom[$i],
 								  'prenom' => $prenom[$i],
@@ -148,10 +176,12 @@ class IdPlus extends Plugins
 				if (!isset($refs[$idperson[$i]]['articles'])) 
 				     $refs[$idperson[$i]]['articles'] = array();
 				array_push($refs[$idperson[$i]]['articles'], $iddocument);
+				*/
 			}
+			/*
 			$json =  json_encode($refs, true);
 			file_put_contents($sitefile, $json);
-		}
+		}*/
 
         header("Location: $siteurl/index.php?$iddocument");
 
