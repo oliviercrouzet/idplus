@@ -39,22 +39,26 @@ class IdPlus extends Plugins
 					$idreflink='';
 					$orcidlink='';
 	                //$result = $db->getrow(lq("SELECT * FROM #_TP_identifiants WHERE id ='". $idperson. "'"));
-				$result = $db->getrow(lq("select distinct(idref) from #_TP_relations join #_TP_entities_auteurs using(idrelation) where id2='".$idperson."' and nature='G' and (idref is not null and idref !='')"));
+				$idref = $db->getOne(lq("select distinct(idref) from #_TP_relations join #_TP_entities_auteurs using(idrelation) where id2='".$idperson."' and nature='G' and idref is not null and idref !=''"));
 					//$result= $db->getrow(lq("SELECT idref FROM entities_auteurs,relations WHERE id2='".$idperson."' and nature='G' and degree=1 and relations.idrelation=entities_auteurs.idrelation"));
 //					file_put_contents("/var/www/prairial/octest",print_r($result,true)." ".$idperson,FILE_APPEND);
 $enregistrer=1;
-					if ($result === false) {
+					if ($idref === false) {
 						trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
 					}
-                    $idref = isset($result['idref']) ? $result['idref'] : '';  
-						file_put_contents('/var/www/prairial/octest','RESULT'. count($result));
+                    if (isset($idref)) { 
+					//	file_put_contents('/var/www/prairial/octest','RESULT'. count($idref));
+				        $emptyIdrefFound = $db->getOne(lq("select count(IFNULL(idref,'')) from #_TP_relations join #_TP_entities_auteurs using(idrelation) where id2='".$idperson."' and nature='G' and (idref is null or idref ='')"));
+                        $enregistrer = $emptyIdrefFound;
+					}
+					/*
 					if ($idref) {
 				        $result = $db->getrow(lq("select idrelation from entities_auteurs join relations using(idrelation) where id2='".$idperson."' and nature='G' and (idref is null or idref='')"));
 						//file_put_contents('/var/www/prairial/octest','RESULT '.$result['idperson']);
                         $enregistrer = count($result);
 					}
+					*/
 					$numFound_idref=0;
-					/*
 					if (!$idref) {
 					    $enregistrer=1;
 						//libxml_use_internal_errors(true);
@@ -70,7 +74,6 @@ $enregistrer=1;
 							}
 						}
 						*/
-						/*
 					    $numFound_idref = (int) $xml->result['numFound'];
 					    if ($numFound_idref > 0) {
 						    $matches = [];
@@ -88,7 +91,6 @@ $enregistrer=1;
 							    
 						}
 				    }
-					*/
 					/*
 					if (!$orcid) {
 					    $xml = simplexml_load_file('https://pub.orcid.org/v2.1/search?q=family-name:'.urlencode($nom).'+AND+given-names:'.urlencode($prenom));
