@@ -14,9 +14,8 @@ class IdPlus extends Plugins
 		if ($context['view']['tpl'] == 'edit_entities_edition' && isset($context['persons']) && $context['lodeluser']['adminlodel'] == '1') {
 			$persons = $context['persons'];
 			$site = $context['site'];
-					file_put_contents("/var/www/prairial/octest",'PERSONS '.print_r($persons,true),FILE_APPEND);
-
 			global $db;
+
 			$authform='<div class="advancedFunc">
 						<h4>Identifiants auteurs</h4>
 						<table class="translations" style="width:90%" cellspacing="0" cellpadding="5" border="0">
@@ -29,8 +28,9 @@ class IdPlus extends Plugins
 					$nom = $p['data']['nomfamille'];
 					$idperson = $p['data']['idperson'];
 					$idref = $p['data']['idref'];
-					$authform.= $this->buildIdrefPart($idref,$nom,$prenom,$idperson);
+					$authform.= $this->buildIdrefHtml($idref,$nom,$prenom,$idperson);
 
+					/*
 					// autres ressources
 					if ($idref) {
 						$extraIds = $this->getExtraIds($idref);
@@ -41,7 +41,7 @@ class IdPlus extends Plugins
 								$authform.= $html;
 							}
 						}
-					}
+					*/
 					$authform.= '</td></tr>';
 				}
 			}
@@ -54,27 +54,25 @@ class IdPlus extends Plugins
 		}
 	}
 
-	private function buildIdrefPart ($idref,$nom,$prenom,$idperson)
+	private function buildIdrefHtml ($idref,$nom,$prenom,$idperson)
 	{
-		$html.= '<tr><td colspan="2" style="font-size:1.1em;color:#8a8a8a"><strong>'.$prenom.' '.$nom.'</strong>
-				<input type="hidden" name="idperson[]" value="'.$idperson.'" />
-				<input type="hidden" name="prenom[]" value="'.$prenom.'" />
-				<input type="hidden" name="nom[]" value="'.$nom.'" />
+		$html = '<tr><td colspan="2" style="font-size:1.1em;color:#8a8a8a"><strong>'.$prenom.' '.$nom.'</strong>
+				<input type="hidden" name="idpersons[]" value="'.$idperson.'" />
+				<input type="hidden" name="prenoms[]" value="'.$prenom.'" />
+				<input type="hidden" name="noms[]" value="'.$nom.'" />
 				</td></tr>';
 
 		$html.= '<tr><td colspan="2" style="padding-left:20px;"><label style="display:inline-block;width:30%">';
-
+		$label = 'IDREF</label>';
 		if (!$idref) {
 			$found = $this->searchIdrefCandidate($nom,$prenom);
 			if ($found['occurrences']) {
 				$occurrences = $found['occurrences'];		    
 				$urls = $found['urls'];		    
-				$html.= '<a style="color:#ff5b04"'.$urls.'>IDREF('.$occurrences.')</a>';
-			} else {
-				$html.='IDREF';
+				$label = '<a style="color:#ff5b04"'.$urls.'>IDREF('.$occurrences.')</a></label>';
 			}
 		}
-		$html.='</label><input style="max-width:70%;" type="text" name="idref[]" value="'.$idref.'"/><br />';
+		$html.= $label.'<input style="max-width:70%;" type="text" name="idrefs[]" value="'.$idref.'"/><br />';
 
 		return $html;
 	}
@@ -82,9 +80,9 @@ class IdPlus extends Plugins
 	private function searchIdrefCandidate($nom,$prenom)
 	{
 		$xml = simplexml_load_file("https://www.idref.fr/Sru/Solr?q=persname_t:(".urlencode($nom." AND ".$prenom).")&fl=ppn_z");
-		$numFound_idref = (int) $xml->result['numFound'];
+		$numFound = (int) $xml->result['numFound'];
 		$idreflink='';
-		if ($numFound_idref > 0) {
+		if ($numFound > 0) {
 			$matches = [];
 			foreach ($xml->xpath('//str[@name="ppn_z"]') as $name) {
 				array_push($matches,'https://www.idref.fr/'.$name);
@@ -119,6 +117,7 @@ class IdPlus extends Plugins
 						$type = $val['result']['source'];
 						$id = $val['result']['identifiant'];
 					}
+					$type = $type == 'BNF' ? 'ARK' : $type;
 					$idents[$type] = $id;
 
 				}
@@ -130,50 +129,61 @@ class IdPlus extends Plugins
 	public function recordAction(&$context,&$errors) 
 	{
 		$siteurl = $context['siteurl'];
-		$idpersons = $_POST['idperson'];
-		$prenoms = $_POST['prenom'];
-		$noms = $_POST['nom'];
-		$idrefs = $_POST['idref'];
-		//$orcid = $_POST['orcid'];
+		$idpersons = $_POST['idpersons'];
+		$prenoms = $_POST['prenoms'];
+		$noms = $_POST['noms'];
+		$idrefs = $_POST['idrefs'];
 		$iddocument = $_POST['iddocument'];
 		$site = $context['site'];
 		global $db;
-		//$q = "INSERT INTO #_TP_identifiants (id, nom, prenom, idref, articles)";
-		/*
-		$sitefile = '../../.././share/plugins/custom/idplus/data/'.$site.'.json';
-		if (file_exists($sitefile)) { 
-			$json_data = file_get_contents($sitefile);
-			$refs =  json_decode($json_data, true);
-	*/	
-			for ($i = 0; $i < count($idperson); $i++) {
-				$id = $idpersons[$i];
-				$ref = $idrefs[$i];
-				//$q .= " VALUES('".$idperson[$i]. "', '". $nom[$i]. "', '". $prenom[$i]. "', '". $idref[$i]. "', concat(articles,'". $iddocument. "'))";
-				// update document courant
-				$q = "update entities_auteurs join relations using(idrelation) set idref='$ref' where id2='$id' and nature='G' and id1 = '$iddocument'";
-				// update tous les documents du même auteur non renseignés
-				$q = "update entities_auteurs join relations using(idrelation) set idref='$ref' where id2='$id' and nature='G'";
-				$q .= " and (idref is null or idref='')";
-				$result = $db->execute(lq($q));
-				if ($result === false) {
-					trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
-				}
-/*
-				$refs[$idperson[$i]] = array (
-								  'nom' => $nom[$i],
-								  'prenom' => $prenom[$i],
-								  'idref' => $idref[$i],
-								  'orcid' => $orcid[$i],
-								 );
-				if (!isset($refs[$idperson[$i]]['articles'])) 
-					 $refs[$idperson[$i]]['articles'] = array();
-				array_push($refs[$idperson[$i]]['articles'], $iddocument);
-				*/
+
+		// extraire la liste des champs identifiants présents dans la table entities_auteurs
+		$q = "SELECT  group_concat(COLUMN_NAME) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'lodeldb_$site' AND TABLE_NAME = 'entities_auteurs'";
+		$result = $db->getOne(lq("$q"));
+		$fields = explode(',',$result);
+		$idfields = array_slice($fields,8);
+
+		for ($i = 0; $i < count($idpersons); $i++) {
+			$idperson = $idpersons[$i];
+			$idref = $idrefs[$i];
+
+			// update document courant
+			//$q = "update entities_auteurs join relations using(idrelation) set idref='$ref' where id2='$id' and nature='G' and id1 = '$iddocument'";
+			// non renseigné
+			//$q .= " and (idref is null or idref='')";
+
+			// update sur tous les documents du même auteur
+			$q = "update entities_auteurs join relations using(idrelation) set idref='$idref' where id2='$idperson' and nature='G'";
+			$result = $db->execute(lq($q));
+			if ($result === false) {
+				trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
 			}
-			/*
-			$json =  json_encode($refs, true);
-			file_put_contents($sitefile, $json);
-		}*/
+
+			if ($idref) {
+				$extraIds = $this->getExtraIds($idref);
+				foreach ($extraIds as $s => $id) {
+					$src = strtolower($s);
+					$src = str_replace('-','',$src);
+					if (in_array($src,$idfields)) {
+						$q = "update entities_auteurs join relations using(idrelation) set $src='$id' where id2='$idperson' and nature='G'";
+						$result = $db->execute(lq($q));
+						if ($result === false) {
+							trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
+						}
+					}
+				}
+
+			} else {
+				// si l'idref a été supprimé, les autres identifiant doivent l'être aussi
+				foreach ($idfields as $field) {
+					$q = "update entities_auteurs join relations using(idrelation) set $field='' where id2='$idperson' and nature='G'";
+					$result = $db->execute(lq($q));
+					if ($result === false) {
+						trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
+					}
+				}
+			}
+		}
 
 		header("Location: $siteurl/index.php?$iddocument");
 
