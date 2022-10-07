@@ -91,8 +91,11 @@ class IdPlus extends Plugins
 			$idreflink = 'href="'.array_shift($matches).'" target="_blank" ';
 			if (count($matches)) {
 				$idreflink.= 'onclick="';
+				$i=0;
 				foreach ($matches as $match) {
 				   $idreflink.= 'window.open(&quot;'.$match.'&quot;);';
+				   // on limite le nombre d'onglets ouvrables
+				   if (++$i == 10) break;
 				}
 				$idreflink.='"';
 			}
