@@ -10,8 +10,9 @@ class IdPlus extends Plugins
 	public function postview(&$context)
 	{
 
-		//if (isset($context['persons']) && $context['lodeluser']['adminlodel'] == '1') {
-		if ($context['view']['tpl'] == 'edit_entities_edition' && isset($context['persons']) && $context['lodeluser']['adminlodel'] == '1') {
+		// le bloc identifiants auteurs ne doit pas s'afficher en deça du niveau Editeur
+		$pluginrights = isset($this->_config['userrights']['value']) ? $this->_config['userrights']['value'] : 30;
+		if ($context['view']['tpl'] == 'edit_entities_edition' && isset($context['persons']) && $context['lodeluser']['rights'] >= $pluginrights) {
 			$persons = $context['persons'];
 			$site = $context['site'];
 			global $db;
