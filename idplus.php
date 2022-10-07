@@ -62,20 +62,33 @@ class IdPlus extends Plugins
 				<input type="hidden" name="prenoms[]" value="'.$prenom.'" />
 				<input type="hidden" name="noms[]" value="'.$nom.'" />
 				</td></tr>';
-
-		$html.= '<tr><td colspan="2" style="padding-left:20px;"><label style="display:inline-block;width:30%">';
+		$html.= '<tr><td colspan="2" style="padding-left:20px;">';
+		$color='';
 		$label = 'IDREF</label>';
 		if (!$idref) {
-			$found = $this->searchIdrefCandidate($nom,$prenom);
-			if ($found['occurrences']) {
-				$occurrences = $found['occurrences'];		    
-				$urls = $found['urls'];		    
-				$label = '<a style="color:#ff5b04"'.$urls.'>IDREF('.$occurrences.')</a></label>';
+			$idref = $this->isAlreadySet($idperson);
+			if (!$idref) {
+				$found = $this->searchIdrefCandidate($nom,$prenom);
+				if ($found['occurrences']) {
+					$occurrences = $found['occurrences'];
+					$urls = $found['urls'];
+					$label = '<a style="color:#ff5b04"'.$urls.'>IDREF('.$occurrences.')</a></label>';
+				}
+			} else {
+				$color="color:#ff5b04;";
 			}
 		}
-		$html.= $label.'<input style="max-width:70%;" type="text" name="idrefs[]" value="'.$idref.'"/><br />';
+		$html .= '<label style="display:inline-block;width:30%;'.$color.'">';
+		$html.= $label.'<input style="max-width:70%;'.$color.'" type="text" name="idrefs[]" value="'.$idref.'"/><br />';
 
 		return $html;
+	}
+
+	private function isAlreadySet ($idperson)
+	{
+		global $db;
+		$q = "select distinct(idref) from relations join entities_auteurs using(idrelation) where id2 = '$idperson' and nature = 'G' and idref is not null and idref !=''";
+		return $db->getOne(lq("$q"));
 	}
 
 	private function searchIdrefCandidate($nom,$prenom)
