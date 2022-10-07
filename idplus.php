@@ -122,6 +122,7 @@ class IdPlus extends Plugins
 						$id = $val['result']['identifiant'];
 					}
 					$type = $type == 'BNF' ? 'ARK' : $type;
+					if ($type == 'UNIV-DROIT') $id = preg_replace('/^.*\//','',$id);
 					$idents[$type] = $id;
 
 				}
