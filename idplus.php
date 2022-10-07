@@ -93,6 +93,7 @@ class IdPlus extends Plugins
 
 	private function searchIdrefCandidate($nom,$prenom)
 	{
+		// api SOLR et idref2id : voir https://abes.fr/api-et-web-services/
 		$xml = simplexml_load_file("https://www.idref.fr/Sru/Solr?q=persname_t:(".urlencode($nom." AND ".$prenom).")&fl=ppn_z");
 		$numFound = (int) $xml->result['numFound'];
 		$idreflink='';
