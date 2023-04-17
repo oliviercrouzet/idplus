@@ -19,8 +19,8 @@ class IdPlus extends Plugins
 
 			$authform='<div class="advancedFunc">
 						<h4>Identifiants auteurs</h4>
-						<table class="translations" style="width:90%" cellspacing="0" cellpadding="5" border="0">
-						<form id="idplus" action="index.php/?do=_idplus_record" method="POST">';
+						<form id="idplus" action="index.php/?do=_idplus_record" method="POST">
+						<table class="translations" style="width:90%" cellspacing="0" cellpadding="5" border="0">';
 			$iddocument=$context['iddocument'];
 
 			foreach ($persons as $person => $aut) {
