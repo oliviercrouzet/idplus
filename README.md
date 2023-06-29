@@ -27,15 +27,15 @@ Administration, section Modèle éditorial / Classes d'index de personnes / Cham
 Tableau *Définition des relations entre entités et personnes* : Ajouter un champ.
 ```
 Renseigner les zones pour chaque identifiant sur le modèle suivant (ici idref) :
-
-Identifiant unique : idref
-Nom utilisé dans l'interface : IDREF
+```
+Identifiant unique : `idref` Nom utilisé dans l'interface : IDREF
 Proposé à partir du niveau... : simple
 Type de champ : Texte court
 XPath OTX : //tei:idno\[@type='IDREF']
 Condition : Aucune condition
 Type d'affichage dans l'interface : Utiliser un champ de formulaire
 poids pour le moteur de recherche : non indexé
+```
 
 ### Via un script php
 
@@ -84,4 +84,4 @@ Le mieux est donc de procéder de la manière suivante :
 ## Crédits
 Plugin réalisé d'après la documentation fournie par Jean-François Rivière :
 https://github.com/OpenEdition/lodel/wiki/Plugins
-Le script nova\_me\_add\_ids.php est repris en majeure partie d'un script communiqué par Thomas Brouard (Edinum) à l'occasion de la mise en oeuvre du site Arabesques.
+Le script nova\_me\_add\_ids.php est repris en majeure partie d'un script communiqué par Thomas Brouard ([Edinum|Chapitre neuf](https://www.edinum.org)) à l'occasion de la mise en oeuvre du site Arabesques.
