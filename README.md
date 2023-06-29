@@ -28,7 +28,8 @@ Tableau *Définition des relations entre entités et personnes* : Ajouter un cha
 ```
 Renseigner les zones pour chaque identifiant sur le modèle suivant (ici idref) :
 ```
-Identifiant unique : `idref` Nom utilisé dans l'interface : IDREF
+Identifiant unique : idref
+Nom utilisé dans l'interface : IDREF
 Proposé à partir du niveau... : simple
 Type de champ : Texte court
 XPath OTX : //tei:idno\[@type='IDREF']
