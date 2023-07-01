@@ -44,7 +44,7 @@ A la racine de votre installation Lodel, lancer le script [*nova\_me\_add\_ids.p
 `php nova_me_add_ids.php site1 site2`
 
 ## Activation
-Accédez à l'administration des plugins dans l'adminstration générale (Administrer/Plugins).
+Accédez à l'administration des plugins dans l'administration générale (Administrer/Plugins).
 > url =>  `https://votreinstallation/lodeladmin/index.php?do=list&lo=mainplugins`
 
   * Si on clique sur *Installer sur tous les sites*, le plugin est non seulement copié mais aussi directement activé au niveau de chaque site, ce qui n'est pas forçément souhaitable.
@@ -52,25 +52,26 @@ Accédez à l'administration des plugins dans l'adminstration générale (Admini
 
 ## Usage
 
-En mode édition d'article, une section "Identifiants auteurs" apparait au dessous de l'encadré des fichers annexes.
-Si les identifiants pour un auteur ne sont pas encore disponibles dans la base, une requête est effectuée automatiquement sur ses nom et prénom dans la base idref.
-Lorsqu'un idref est trouvé puis enregistré, une deuxième requête est lancée pour récupérer les autres identifiants fournis en plus de l’idref.
+En mode édition d'article, une section "Identifiants auteurs" apparait au dessous de l'encadré des fichiers annexes.  
+Si les identifiants pour un auteur ne sont pas encore disponibles dans la base, une requête est effectuée automatiquement sur ses nom et prénom dans la base idref.  
+Lorsqu'un idref est trouvé puis enregistré, une deuxième requête est lancée pour récupérer les autres identifiants fournis en plus de l’idref.  
 Les identifiants sont alors ajoutés à tous les articles du même auteur pour lesquels ils n'auraient pas encore été renseignés.
 
 ### 4 cas de figure possibles :
 
-1. Un lien *IDREF* orange apparait suivi d'un nombre d’occurrence entre parenthèse.
-=> Un clic sur la mention IDREF ouvre dans votre navigateur autant d’onglets que d’occurrences trouvées (limitées à 10). Après vérification sur la base IDREF, on renseigne le bon identifiant et on enregistre.
+1. Un lien *IDREF* orange apparait suivi d'un nombre d’occurrence entre parenthèse.  
+   => Un clic sur la mention IDREF ouvre dans votre navigateur autant d’onglets que d’occurrences trouvées (limitées à 10).  
+   Après vérification sur la base IDREF, on renseigne le bon identifiant et on enregistre.
 
-2. La mention IDREF et le numero idref apparaissent en orange
-=> Les identifiants sont déja disponibles dans la base pour d'autres articles du même auteur mais pas encore enregistrés pour cet article.
+2. La mention IDREF et le numero idref apparaissent en orange.    
+   => Les identifiants sont déja disponibles dans la base pour d'autres articles du même auteur mais pas encore enregistrés pour cet article.  
    Il vous reste dont à cliquer sur Enregistrer et ce sera fait.
 
-3. La mention IDREF apparait en gris et aucun numéro idref n'apparait
-=> L’idref pour cet auteur n’a pas été trouvé.
+3. La mention IDREF apparait en gris et aucun numéro idref n'apparait.  
+   => L’idref pour cet auteur n’a pas été trouvé.
 
-4. La mention IDREF et le numero idref apparaissent en gris
-=> L'idref est déja renseigné pour cet auteur et cet article
+4. La mention IDREF et le numero idref apparaissent en gris.  
+   => L'idref est déja renseigné pour cet auteur et cet article
 
 ## Désinstallation
 
@@ -84,5 +85,5 @@ Le mieux est donc de procéder de la manière suivante :
 
 ## Crédits
 Plugin réalisé d'après la documentation fournie par Jean-François Rivière :
-https://github.com/OpenEdition/lodel/wiki/Plugins
-Le script nova\_me\_add\_ids.php est repris en majeure partie d'un script communiqué par Thomas Brouard ([Edinum|Chapitre neuf](https://www.edinum.org)) à l'occasion de la mise en oeuvre du site Arabesques.
+https://github.com/OpenEdition/lodel/wiki/Plugins.    
+Le script *nova\_me\_add\_ids.php* est repris en majeure partie d'un script communiqué par Thomas Brouard ([Edinum|Chapitre neuf](https://www.edinum.org)) à l'occasion de la mise en oeuvre du site Arabesques.
