@@ -60,18 +60,23 @@ Les identifiants sont alors ajoutés à tous les articles du même auteur pour l
 ### 4 cas de figure possibles :
 
 1. Un lien *IDREF* orange apparait suivi d'un nombre d’occurrence entre parenthèse.  
+   ![](img/img-1.png)  
    => Un clic sur la mention IDREF ouvre dans votre navigateur autant d’onglets que d’occurrences trouvées (limitées à 10).  
    Après vérification sur la base IDREF, on renseigne le bon identifiant et on enregistre.
 
-2. La mention IDREF et le numero idref apparaissent en orange.    
+2. La mention IDREF et le numero idref apparaissent en orange.  
+   ![](img/img-2.png)  
    => Les identifiants sont déja disponibles dans la base pour d'autres articles du même auteur mais pas encore enregistrés pour cet article.  
-   Il vous reste dont à cliquer sur Enregistrer et ce sera fait.
+   Il vous reste dont à cliquer sur *Enregistrer* et ce sera fait.
 
-3. La mention IDREF apparait en gris et aucun numéro idref n'apparait.  
+3. La mention IDREF et le numero idref apparaissent en gris.  
+   ![](img/img-3.png)  
+   => L'idref est déja renseigné pour cet auteur et cet article.
+
+4. La mention IDREF apparait en gris et aucun numéro idref n'apparait.  
+   ![](img/img-4.png)  
    => L’idref pour cet auteur n’a pas été trouvé.
 
-4. La mention IDREF et le numero idref apparaissent en gris.  
-   => L'idref est déja renseigné pour cet auteur et cet article
 
 ## Désinstallation
 
