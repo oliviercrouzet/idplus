@@ -30,19 +30,6 @@ class IdPlus extends Plugins
 					$idperson = $p['data']['idperson'];
 					$idref = $p['data']['idref'];
 					$authform.= $this->buildIdrefHtml($idref,$nom,$prenom,$idperson);
-
-					/*
-					// autres ressources
-					if ($idref) {
-						$extraIds = $this->getExtraIds($idref);
-						foreach ($extraIds as $source => $id) {
-							if ($id) {
-								$html = '<label style="display:inline-block;width:30%;">'.$source.'</label>';
-								$html.= '<input style="max-width: 70%;margin-top:5px" name="'.$source.'[]" value="'.$id.'" />';
-								$authform.= $html;
-							}
-						}
-					*/
 					$authform.= '</td></tr>';
 				}
 			}
@@ -165,11 +152,6 @@ class IdPlus extends Plugins
 		for ($i = 0; $i < count($idpersons); $i++) {
 			$idperson = $idpersons[$i];
 			$idref = $idrefs[$i];
-
-			// update document courant
-			//$q = "update entities_auteurs join relations using(idrelation) set idref='$ref' where id2='$id' and nature='G' and id1 = '$iddocument'";
-			// non renseigné
-			//$q .= " and (idref is null or idref='')";
 
 			// update sur tous les documents du même auteur
 			$q = "update entities_auteurs join relations using(idrelation) set idref='$idref' where id2='$idperson' and nature='G'";
