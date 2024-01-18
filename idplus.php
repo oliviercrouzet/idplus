@@ -84,11 +84,13 @@ class IdPlus extends Plugins
 		$xml = simplexml_load_file("https://www.idref.fr/Sru/Solr?q=persname_t:(".urlencode($nom." AND ".$prenom).")&fl=ppn_z");
 		$numFound = (int) $xml->result['numFound'];
 		$idreflink='';
+		$occurrences=0;
 		if ($numFound > 0) {
 			$matches = [];
-			foreach ($xml->xpath('//str[@name="ppn_z"]') as $name) {
-				array_push($matches,'https://www.idref.fr/'.$name);
+			foreach ($xml->xpath('//doc/str') as $id) {
+				array_push($matches,'https://www.idref.fr/'.$id);
 			}
+			$occurrences=count($matches);
 			$idreflink = 'href="'.array_shift($matches).'" target="_blank" ';
 			if (count($matches)) {
 				$idreflink.= 'onclick="';
@@ -101,7 +103,7 @@ class IdPlus extends Plugins
 				$idreflink.='"';
 			}
 		}
-		return ['urls' => $idreflink,'occurrences' => $numFound];
+		return ['urls' => $idreflink,'occurrences' => $occurrences];
 	}
 
 	private function getExtraIds($idref)
