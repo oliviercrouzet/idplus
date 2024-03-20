@@ -23,12 +23,13 @@ class IdPlus extends Plugins
 						<table class="translations" style="width:90%" cellspacing="0" cellpadding="5" border="0">';
 			$iddocument=$context['iddocument'];
 
-			foreach ($persons as $person => $aut) {
-				foreach ($aut as $p) {
-					$prenom = $p['data']['prenom'];
-					$nom = $p['data']['nomfamille'];
-					$idperson = $p['data']['idperson'];
-					$idref = $p['data']['idref'];
+			foreach ($persons as $persontype => $authors) {
+			    if ($this->getPersonType($persontype) == 'auteuroeuvre') continue;
+				foreach ($authors as $author) {
+					$prenom = $author['data']['prenom'];
+					$nom = $author['data']['nomfamille'];
+					$idperson = $author['data']['idperson'];
+					$idref = $author['data']['idref'];
 					$authform.= $this->buildIdrefHtml($idref,$nom,$prenom,$idperson);
 					$authform.= '</td></tr>';
 				}
@@ -132,6 +133,13 @@ class IdPlus extends Plugins
 			}
 		}
 		return $idents;
+	}
+
+	private function getPersonType ($idtype)
+	{
+		global $db;
+		$q = "select type from persontypes where id='$idtype'";
+		return $db->getOne(lq("$q"));
 	}
 
 	public function recordAction(&$context,&$errors) 
