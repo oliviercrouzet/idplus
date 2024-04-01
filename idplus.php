@@ -1,5 +1,4 @@
 <?php
-// ma classe doit absolument étendre la classe de base 'Plugins'
 class IdPlus extends Plugins
 {
 	// pas besoin d'initialiser quoique ce soit à l'activation/désactivation du plugin
@@ -7,21 +6,54 @@ class IdPlus extends Plugins
 	public function enableAction(&$context, &$error) {}
 	public function disableAction(&$context, &$error) {}
 
+	public function preview(&$context)
+	{
+		global $db;
+		$site = $context['site'];
+		$iddocument=$context['identity'];
+
+		// sauvegarde des identifiants existants afin de pouvoir les réinjecter en cas de rechargement du document
+		if  ( $context['view']['tpl'] == 'checkimport' && isset($context['reload']) ) {
+			$this->saveIdsToFile($site,$iddocument);
+		} else {
+			// réinjection des identifiants sauvegardés
+			$cachedfile = $this->getPath($site,$iddocument);
+			if (file_exists($cachedfile)) {
+				$saved_ids = json_decode(file_get_contents($cachedfile),true);
+				foreach ($saved_ids as $author) {
+					if (empty($author['idref'])) continue;
+					$idperson = array_shift($author);
+					$ids = [];
+					foreach ($author as $idtype => $id) {
+						$ids[] = "$idtype='$id'";
+					}
+					$q = "update entities_auteurs join relations using(idrelation) set ".implode(',',$ids)." where id2='$idperson' and nature='G'";
+					$result = $db->execute(lq($q));
+					if ($result === false) {
+						trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
+					}
+				}
+				unlink($cachedfile);
+			}
+		}
+
+	}
+
 	public function postview(&$context)
 	{
-
 		// le bloc identifiants auteurs ne doit pas s'afficher en deça du niveau Editeur
 		$pluginrights = isset($this->_config['userrights']['value']) ? $this->_config['userrights']['value'] : 30;
-		if ($context['view']['tpl'] == 'edit_entities_edition' && isset($context['persons']) && $context['lodeluser']['rights'] >= $pluginrights) {
+		if  ( $context['view']['tpl'] == 'edit_entities_edition' && isset($context['persons']) && $context['lodeluser']['rights'] >= $pluginrights) {
 			$persons = $context['persons'];
 			$site = $context['site'];
+			$iddocument=$context['iddocument'];
+
 			global $db;
 
 			$authform='<div class="advancedFunc">
 						<h4>Identifiants auteurs</h4>
 						<form id="idplus" action="index.php/?do=_idplus_record" method="POST">
 						<table class="translations" style="width:90%" cellspacing="0" cellpadding="5" border="0">';
-			$iddocument=$context['iddocument'];
 
 			foreach ($persons as $persontype => $authors) {
 			    if ($this->getPersonType($persontype) == 'auteuroeuvre') continue;
@@ -39,6 +71,7 @@ class IdPlus extends Plugins
 			$authform.= '<input type="hidden" name="iddocument" value="'.$iddocument.'"/>
 							<input type="submit" value="Enregistrer" />';
 			$authform .= '</form></div>';  
+
 			View::$page = preg_replace('/(<\/div>\s*<\/div>\s*<\/body>)/s',$authform.'$1',View::$page);
 		}
 	}
@@ -142,6 +175,48 @@ class IdPlus extends Plugins
 		return $db->getOne(lq("$q"));
 	}
 
+	private function saveIdsToFile ($site,$iddocument)
+	{
+		global $db;
+		$query = "select p.id as idperson, e.* from  entities_auteurs e left join relations using(idrelation) left join persons p on id2=p.id ";
+		$query .= "left join persontypes t on p.idtype=t.id where id1 = '$iddocument' and t.type != 'auteuroeuvre' and idref != '' and idref is not null";
+		$result = $db->getArray(lq($query));
+
+		$saved_ids = [];
+		foreach($result as $row ) {
+			$idperson = array_shift($row);
+			$author_ids = ['idperson' => $idperson];
+			$idfields = array_slice($row,7); // on garde seulement les champs identifiants
+			foreach ($idfields as $idtype => $id) {
+				if ($id) $author_ids[$idtype] = $id;
+			}
+			$saved_ids[] = $author_ids;
+		}
+
+		if (empty($saved_ids)) return;
+
+		$cache_path = $this->getPath();
+		if ( ! is_dir($cache_path) ) {
+			mkdir($cache_path, 0755, TRUE);
+		}
+		$cache_file = $cache_path . DIRECTORY_SEPARATOR . "idplus_${site}_${iddocument}";
+
+		if (!$fh = fopen($cache_file, "w"))
+			trigger_error("Cannot open $cache_file", E_USER_ERROR);
+			if (!fwrite($fh,json_encode($saved_ids,true))) {
+			trigger_error("Cannot write $cache_file", E_USER_ERROR);
+		} else {
+			fclose($fh);
+		}
+	}
+
+	private function getPath($site=null,$iddocument=null)
+	{
+		$path = str_replace('/lodel/edition', '', getcwd()) . DIRECTORY_SEPARATOR . 'CACHE';
+		if ($site) $path .= DIRECTORY_SEPARATOR . "idplus_${site}_${iddocument}";
+		return $path;
+	}
+
 	public function recordAction(&$context,&$errors) 
 	{
 		$siteurl = $context['siteurl'];
@@ -192,6 +267,10 @@ class IdPlus extends Plugins
 					if ($result === false) {
 						trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
 					}
+				}
+				$cachedfile = $this->getPath($site,$iddocument);
+				if (file_exists($cachedfile)) {
+				    unlink($cachedfile);
 				}
 			}
 		}

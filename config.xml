@@ -4,7 +4,7 @@
     <description>Ajout d'identifiant auteurs</description>
     <sql>0</sql>
     <hookType>class</hookType>
-    <triggers>postview</triggers>
+    <triggers>preview,postview</triggers>
     <parameters>
         <param name="userrights" title="Droits utilisateurs" type="select" allowedValues="30,40,128" defaultValue="30" required="true"/>
     </parameters>
