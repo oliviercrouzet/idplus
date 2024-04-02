@@ -61,8 +61,10 @@ Les identifiants sont alors ajoutés à tous les articles du même auteur pour l
 
 1. Un lien *IDREF* orange apparait suivi d'un nombre d’occurrence entre parenthèse.  
    ![](img/img-1.png)  
-   => Un clic sur la mention IDREF ouvre dans votre navigateur autant d’onglets que d’occurrences trouvées (limitées à 10).  
+   => Un clic sur la mention IDREF ouvre autant d’onglets que d’occurrences trouvées\* dans une limite de 10.  
    Après vérification sur la base IDREF, on renseigne le bon identifiant et on enregistre.
+
+   \* À condition d'autoriser l'ouverture de pop-ups sur votre navigateur, soit ponctuellement, soit en ajoutant temporairement, dans les paramètres de ce dernier, une exception au blocage contenant l'url de la plateforme (Firefox : Vie privée/Permissions | Chrome : Confidentialité/Paramètres des sites).
 
 2. La mention IDREF et le numero idref apparaissent en orange.  
    ![](img/img-2.png)  
