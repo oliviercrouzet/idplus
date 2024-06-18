@@ -14,7 +14,7 @@ Une icône-lien apparait alors en fin d'article dans la section *Auteurs - Autre
 ## Installation
 Dans le répertoire *share/plugins/custom/* de votre installation, dézippez l'archive du plugin ou clonez le dépôt :
 ```
-git clone https://github.com/oliviercrouzet/idplus/.git
+git clone https://github.com/oliviercrouzet/idplus.git
 ```
 
 ## Ajout de nouveaux champs dans la base mysql
