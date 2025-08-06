@@ -229,7 +229,7 @@ class IdPlus extends Plugins
 		global $db;
 
 		// extraire la liste des champs identifiants présents dans la table entities_auteurs
-		$q = "SELECT  group_concat(COLUMN_NAME) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'lodeldb_$site' AND TABLE_NAME = 'entities_auteurs'";
+		$q = "SELECT  group_concat(COLUMN_NAME) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '".$db->database."' AND TABLE_NAME = 'entities_auteurs'";
 		$result = $db->getOne($q);
 		$fields = explode(',',$result);
 		$idfields = array_slice($fields,8);
