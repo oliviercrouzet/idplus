@@ -28,7 +28,7 @@ class IdPlus extends Plugins
 						$ids[] = "$idtype='$id'";
 					}
 					$q = "update entities_auteurs join relations using(idrelation) set ".implode(',',$ids)." where id2='$idperson' and nature='G'";
-					$result = $db->execute(lq($q));
+					$result = $db->execute($q);
 					if ($result === false) {
 						trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
 					}
@@ -109,7 +109,7 @@ class IdPlus extends Plugins
 	{
 		global $db;
 		$q = "select distinct(idref) from relations join entities_auteurs using(idrelation) where id2 = '$idperson' and nature = 'G' and idref is not null and idref !=''";
-		return $db->getOne(lq("$q"));
+		return $db->getOne($q);
 	}
 
 	private function searchIdrefCandidate($nom,$prenom)
@@ -172,7 +172,7 @@ class IdPlus extends Plugins
 	{
 		global $db;
 		$q = "select type from persontypes where id='$idtype'";
-		return $db->getOne(lq("$q"));
+		return $db->getOne($q);
 	}
 
 	private function saveIdsToFile ($site,$iddocument)
@@ -180,7 +180,7 @@ class IdPlus extends Plugins
 		global $db;
 		$query = "select p.id as idperson, e.* from  entities_auteurs e left join relations using(idrelation) left join persons p on id2=p.id ";
 		$query .= "left join persontypes t on p.idtype=t.id where id1 = '$iddocument' and t.type != 'auteuroeuvre' and idref != '' and idref is not null";
-		$result = $db->getArray(lq($query));
+		$result = $db->getArray($query);
 
 		$saved_ids = [];
 		foreach($result as $row ) {
@@ -230,7 +230,7 @@ class IdPlus extends Plugins
 
 		// extraire la liste des champs identifiants présents dans la table entities_auteurs
 		$q = "SELECT  group_concat(COLUMN_NAME) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'lodeldb_$site' AND TABLE_NAME = 'entities_auteurs'";
-		$result = $db->getOne(lq("$q"));
+		$result = $db->getOne($q);
 		$fields = explode(',',$result);
 		$idfields = array_slice($fields,8);
 
@@ -240,7 +240,7 @@ class IdPlus extends Plugins
 
 			// update sur tous les documents du même auteur
 			$q = "update entities_auteurs join relations using(idrelation) set idref='$idref' where id2='$idperson' and nature='G'";
-			$result = $db->execute(lq($q));
+			$result = $db->execute($q);
 			if ($result === false) {
 				trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
 			}
@@ -252,7 +252,7 @@ class IdPlus extends Plugins
 					$src = str_replace('-','',$src);
 					if (in_array($src,$idfields)) {
 						$q = "update entities_auteurs join relations using(idrelation) set $src='$id' where id2='$idperson' and nature='G'";
-						$result = $db->execute(lq($q));
+						$result = $db->execute($q);
 						if ($result === false) {
 							trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
 						}
@@ -263,7 +263,7 @@ class IdPlus extends Plugins
 				// si l'idref a été supprimé, les autres identifiant doivent l'être aussi
 				foreach ($idfields as $field) {
 					$q = "update entities_auteurs join relations using(idrelation) set $field='' where id2='$idperson' and nature='G'";
-					$result = $db->execute(lq($q));
+					$result = $db->execute($q);
 					if ($result === false) {
 						trigger_error("SQL ERROR :<br />".$GLOBALS['db']->ErrorMsg(), E_USER_ERROR);
 					}
